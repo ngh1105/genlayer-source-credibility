@@ -1,3 +1,4 @@
+# { "Depends": "py-genlayer:test" }
 # source_registry.py
 # =============================================================================
 # Source Credibility Registry — GenLayer Intelligent Contract (skeleton)

@@ -1,3 +1,4 @@
+# { "Depends": "py-genlayer:test" }
 # probe_storage.py — canonical minimal GenLayer Intelligent Contract.
 # Used only to isolate whether the studionet deploy+read flow works at all,
 # independent of our larger skeleton contracts.
