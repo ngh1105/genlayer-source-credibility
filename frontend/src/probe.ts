@@ -12,8 +12,10 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 import { createClient, createAccount } from "genlayer-js";
-import { studionet } from "genlayer-js/chains";
+import { studionet, localnet } from "genlayer-js/chains";
 import { TransactionStatus, type Address, type Hash } from "genlayer-js/types";
+
+const CHAIN = process.env.GENLAYER_NETWORK === "localnet" ? localnet : studionet;
 
 function requireKey(): `0x${string}` {
   const k = process.env.GENLAYER_PRIVATE_KEY;
@@ -23,27 +25,53 @@ function requireKey(): `0x${string}` {
   return k as `0x${string}`;
 }
 
-function readCode(): string {
+function readCode(): Uint8Array {
   const here = dirname(fileURLToPath(import.meta.url));
-  return readFileSync(resolve(here, "..", "..", "contracts", "probe_storage.py"), "utf8");
+  // GenLayer expects raw bytes for the contract module, not a UTF-8 string.
+  return new Uint8Array(
+    readFileSync(resolve(here, "..", "..", "contracts", "probe_storage.py")),
+  );
 }
 
 async function main(): Promise<void> {
   const account = createAccount(requireKey());
-  const client = createClient({ chain: studionet, account });
+  const client = createClient({ chain: CHAIN, account });
 
   console.log("Probe: deploy minimal Storage contract");
+  // Canonical flow: ensure the consensus contract is initialized for this
+  // client/account before deploying (required by genlayer-js deploy script).
+  await client.initializeConsensusSmartContract();
+
   const txHash = (await client.deployContract({
     code: readCode(),
     args: ["hello-studionet"],
   })) as Hash;
   console.log("  deploy tx:", txHash);
 
+  // Contracts become queryable at ACCEPTED (optimistic state); FINALIZED
+  // takes much longer and isn't required to read state.
+  const waitStatus =
+    process.env.WAIT_STATUS === "FINALIZED"
+      ? TransactionStatus.FINALIZED
+      : TransactionStatus.ACCEPTED;
   const receipt = await client.waitForTransactionReceipt({
     hash: txHash,
-    status: TransactionStatus.FINALIZED,
+    status: waitStatus,
   });
-  const address = (receipt as { recipient?: string }).recipient as Address;
+  // Address derivation differs by network (per official deployScript.ts):
+  //  - localnet:  receipt.data.contract_address
+  //  - studionet/testnet: receipt.txDataDecoded.contractAddress
+  const r = receipt as {
+    data?: { contract_address?: string };
+    txDataDecoded?: { contractAddress?: string };
+    recipient?: string;
+  };
+  const isLocal = CHAIN.id === localnet.id;
+  const address = (
+    isLocal
+      ? r.data?.contract_address
+      : r.txDataDecoded?.contractAddress ?? r.recipient
+  ) as Address;
   console.log("  deployed at:", address);
 
   // Read back from the minted address, retrying to absorb any indexing lag

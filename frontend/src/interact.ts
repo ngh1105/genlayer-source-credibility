@@ -21,7 +21,7 @@ import { TransactionStatus, type Address, type Hash } from "genlayer-js/types";
 
 /** Deployed registry on studionet (override via REGISTRY_ADDRESS). */
 const REGISTRY_ADDRESS = (process.env.REGISTRY_ADDRESS ??
-  "0x64304A5a26386F1E3278c1e177F0DE9D182396Da") as Address;
+  "0xAb39F0Aca88DD25A814533e18D368290bE011aDE") as Address;
 
 function requirePrivateKey(): `0x${string}` {
   const key = process.env.GENLAYER_PRIVATE_KEY;
@@ -79,9 +79,9 @@ async function main(): Promise<void> {
 
   await client.waitForTransactionReceipt({
     hash: txHash,
-    status: TransactionStatus.FINALIZED,
+    status: TransactionStatus.ACCEPTED,
   });
-  console.log("  finalized ✅");
+  console.log("  accepted ✅");
 
   // --- read: get_record (full raw record) ---------------------------------
   console.log("\n→ get_record:", url);

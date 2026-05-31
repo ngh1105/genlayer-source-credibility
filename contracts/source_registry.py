@@ -1,4 +1,6 @@
-# { "Depends": "py-genlayer:test" }
+# v0.2.16
+# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
+
 # source_registry.py
 # =============================================================================
 # Source Credibility Registry — GenLayer Intelligent Contract (skeleton)
@@ -33,8 +35,6 @@
 #   across SDK versions it is flagged with `# ASSUMPTION:` so a reader can
 #   reconcile against their installed version.
 # =============================================================================
-
-from __future__ import annotations
 
 # The GenLayer runtime injects the `gl` module into GenVM contracts.
 # (Importing it directly is the documented convention.)
@@ -103,7 +103,7 @@ class SourceRegistry(gl.Contract):
         # Deployer becomes the governance owner. Governance is intentionally
         # minimal here (deprecate + override); real deployments would use a
         # multisig or DAO module on Base (see ARCHITECTURE.md).
-        self.owner = gl.message.sender_account
+        self.owner = gl.message.sender_address
 
     # =========================================================================
     # Helpers (pure, run on every node identically -> deterministic)
@@ -207,7 +207,7 @@ class SourceRegistry(gl.Contract):
             "lastChecked": 0,
             "lastScored": 0,
             "fallbacks": fallbacks,
-            "registrant": str(gl.message.sender_account),
+            "registrant": str(gl.message.sender_address),
             "probeCount": 0,
             "failCount": 0,
         }
@@ -420,7 +420,7 @@ Return STRICT JSON only:
         Used when a domain is confirmed compromised/clone or permanently dead.
         Non-destructive: the record is kept (audit trail) but marked DEPRECATED.
         """
-        if gl.message.sender_account != self.owner:
+        if gl.message.sender_address != self.owner:
             raise Exception("only owner may deprecate")
         url = self._normalize(url)
         record = self._load(url)
@@ -437,7 +437,7 @@ Return STRICT JSON only:
         keeps under-scoring, or a confirmed-bad one to zero out immediately).
         Refreshes lastScored so decay restarts from now.
         """
-        if gl.message.sender_account != self.owner:
+        if gl.message.sender_address != self.owner:
             raise Exception("only owner may override")
         url = self._normalize(url)
         record = self._load(url)
