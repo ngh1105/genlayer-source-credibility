@@ -8,6 +8,9 @@
     "build": "tsc -p tsconfig.json",
     "client": "node --loader ts-node/esm src/client.ts",
     "deploy": "node --loader ts-node/esm src/deploy.ts",
+    "interact": "node --loader ts-node/esm src/interact.ts",
+    "inspect": "node --loader ts-node/esm src/inspect.ts",
+    "probe": "node --loader ts-node/esm src/probe.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

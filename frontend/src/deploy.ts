@@ -98,6 +98,14 @@ async function main(): Promise<void> {
     status: TransactionStatus.FINALIZED,
   });
 
+  if (process.env.DUMP_RECEIPT === "1") {
+    console.log("\n--- full receipt ---");
+    console.log(
+      JSON.stringify(receipt, (_k, v) => (typeof v === "bigint" ? v.toString() : v), 2),
+    );
+    console.log("--- end receipt ---\n");
+  }
+
   const r = receipt as {
     contractAddress?: string;
     recipient?: string;
