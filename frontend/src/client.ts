@@ -17,7 +17,8 @@
 
 // NOTE: import path is illustrative. genlayer-js re-exports a client
 // factory plus chain presets. Adjust to the version you install.
-import { createClient, type GenLayerClient } from "genlayer-js";
+import { createClient } from "genlayer-js";
+import type { GenLayerClient } from "genlayer-js/types";
 // import { studionet, localnet } from "genlayer-js/chains"; // chain presets
 
 // ---------------------------------------------------------------------------
