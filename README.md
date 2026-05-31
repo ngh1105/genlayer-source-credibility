@@ -215,16 +215,30 @@ fee hook described in `ARCHITECTURE.md`) so the registry is usable without it.
 └── .gitignore
 ```
 
-## Quick start (illustrative — no installs run during scaffolding)
+## Quick start (verified end-to-end on studionet)
 
 ```bash
-# Contract: deploy with the GenLayer tooling / Studio against your node.
-#   (see GenLayer docs for the deploy command for your SDK version)
-
-# Frontend stub:
 cd frontend
-npm install            # pulls genlayer-js + ts tooling
-GENLAYER_RPC=http://127.0.0.1:4000/api \
-REGISTRY_ADDRESS=0xYourDeployedRegistry \
-  npm run client       # registers a source, then queries its trust score
+npm install            # genlayer-js + ts tooling
+
+# Deploy the contract (no gas on studionet; uses an ephemeral key you provide)
+GENLAYER_NETWORK=studionet \
+GENLAYER_PRIVATE_KEY=0x<64-hex testnet key> \
+  npm run deploy       # prints REGISTRY_ADDRESS=0x...
+
+# Register a source, then read its record / trust view back
+GENLAYER_NETWORK=studionet \
+GENLAYER_PRIVATE_KEY=0x<...> \
+REGISTRY_ADDRESS=0x<deployed> \
+URL=https://en.wikipedia.org/wiki/Bitcoin \
+  npm run interact
+
+# Run the AI credibility judge (web.render + LLM consensus) on a source
+GENLAYER_NETWORK=studionet GENLAYER_PRIVATE_KEY=0x<...> \
+REGISTRY_ADDRESS=0x<deployed> URL=https://en.wikipedia.org/wiki/Bitcoin \
+  npm run assess
 ```
+
+Helper scripts: `deploy`, `interact`, `assess`, `validate` (check contract in
+GenVM without deploying), `probe` (minimal deploy+read), `inspect` (dump a tx
+receipt). See `DEPLOYMENTS.md` for live studionet addresses.
