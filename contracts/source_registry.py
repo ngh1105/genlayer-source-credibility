@@ -289,7 +289,18 @@ class SourceRegistry(gl.Contract):
 
         def _judge() -> str:
             # Non-deterministic block: fetch fresh, then ask the model.
-            page = gl.nondet.web.render(url, mode="text")  # type: ignore[attr-defined]
+            # A registry that tracks LIVENESS must treat an unreachable or
+            # non-renderable source as a graded OFFLINE signal, NOT a crash.
+            try:
+                page = gl.nondet.web.render(url, mode="text")  # type: ignore[attr-defined]
+            except Exception:
+                # Signal load failure as a structured verdict; all validators
+                # rendering the same dead URL converge on the same outcome.
+                return (
+                    '{"score": 0, "real_domain": false, "fresh": false, '
+                    '"clone_suspected": false, "load_failed": true, '
+                    '"reason": "page could not be loaded"}'
+                )
             snippet = (page or "")[:6000]  # bound prompt size
             prompt = f"""You are auditing a web source for an on-chain oracle.
 
@@ -327,6 +338,16 @@ Return STRICT JSON only:
         )
 
         verdict = json.loads(verdict_json)
+
+        # Graceful liveness handling: if the page could not be loaded, mark the
+        # source OFFLINE and record the failure instead of scoring stale data.
+        if bool(verdict.get("load_failed", False)):
+            record["status"] = STATUS_OFFLINE
+            record["failCount"] = int(record.get("failCount", 0)) + 1
+            record["lastChecked"] = self._now()
+            self._save(url, record)
+            return
+
         score = max(0, min(100, int(verdict.get("score", 0))))
         clone = bool(verdict.get("clone_suspected", False))
 

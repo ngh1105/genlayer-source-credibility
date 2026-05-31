@@ -12,6 +12,7 @@
     "inspect": "node --loader ts-node/esm src/inspect.ts",
     "probe": "node --loader ts-node/esm src/probe.ts",
     "validate": "node --loader ts-node/esm src/validate.ts",
+    "assess": "node --loader ts-node/esm src/assess.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

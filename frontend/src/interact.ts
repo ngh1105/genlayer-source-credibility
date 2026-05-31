@@ -60,12 +60,13 @@ async function main(): Promise<void> {
   console.log("  contract:", REGISTRY_ADDRESS);
   console.log("  caller:  ", account.address);
 
-  const url = "https://api.coingecko.com/api/v3/simple/price";
-  const category = "price-feed";
-  const fallbacks = [
-    "https://api.coinbase.com/v2/prices/BTC-USD/spot",
-    "https://api.kraken.com/0/public/Ticker",
-  ];
+  const url = process.env.URL ?? "https://en.wikipedia.org/wiki/Bitcoin";
+  const category = process.env.CATEGORY ?? "reference";
+  const fallbacks = (process.env.FALLBACKS ??
+    "https://www.coindesk.com,https://www.bbc.com/news")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   // --- write: register_source ---------------------------------------------
   console.log("\n→ register_source:", url);
