@@ -1,0 +1,24 @@
+{
+  "name": "source-credibility-registry-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal genlayer-js client stub for the Source Credibility Registry: register a source and query its trust score.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "client": "node --loader ts-node/esm src/client.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "genlayer-js": "^0.6.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "//note": "Stub only. Versions are illustrative pins; run `npm install` yourself. No installs performed during scaffolding."
+}
